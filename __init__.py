@@ -48,7 +48,6 @@ class QuickCompOperator(bpy.types.Operator):
     def execute(self, context):
         bpy.context.scene.use_nodes = True
         tree = bpy.context.scene.node_tree
-
         textureList = bpy.data.textures
         nodeCount = 0
         textureCount = 0
