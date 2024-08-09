@@ -9,7 +9,6 @@ bl_info = {
     "warning": "This add-on will remove all your existing compositing nodes and add new ones",
     "support": "COMMUNITY",
 }
-__version__ = ".".join(map(str, bl_info["version"]))
 
 import bpy  # type: ignore #? Disabling warning visualization
 
