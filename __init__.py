@@ -1,7 +1,13 @@
 bl_info = {
     "name": "Quick Comp! FREE",
-    "blender": (4, 20, 0),
+    "blender": (4, 2, 0),
     "category": "Compositing",
+    "version": (1, 0, 0),
+    "author": "LightAndy",
+    "description": "Quick Comp! (FREE) is a Blender add-on designed to enhance the rendering process with just a single click (or two).",
+    "location": "View3D > N Panel",
+    "warning": "This add-on will remove all your existing compositing nodes and add new ones",
+    "support": "COMMUNITY",
 }
 
 import bpy  # type: ignore #? Disabling warning visualization
