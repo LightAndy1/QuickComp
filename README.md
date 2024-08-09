@@ -42,7 +42,7 @@
 
 ## Download
 
-You can [download](https://github.com/LightAndy/QuickComp/releases/tag/v1.2.0) the latest version of Quick Comp! (FREE) for Blender v4.2.0.
+You can [download](https://github.com/LightAndy1/QuickComp/releases/tag/v1.0.0) the latest version of Quick Comp! (FREE) for Blender v4.2.0.
 
 ## Support
 
