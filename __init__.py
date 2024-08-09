@@ -46,6 +46,7 @@ class QuickCompOperator(bpy.types.Operator):
     )
 
     def execute(self, context):
+        bpy.context.scene.use_nodes = True
         tree = bpy.context.scene.node_tree
 
         bpy.data.textures.new("Film Grain QC", type="NOISE")
@@ -73,7 +74,6 @@ class QuickCompOperator(bpy.types.Operator):
         links.new(blurNode.outputs["Image"], mixNode.inputs[2])
         links.new(mixNode.outputs["Image"], outputNode.inputs["Image"])
 
-        bpy.context.scene.use_nodes = True
         textureList = bpy.data.textures
         nodeCount = 0
         textureCount = 0
