@@ -58,7 +58,7 @@ You can [download](https://github.com/LightAndy/QuickComp/releases/tag/v1.2.0) t
 
 ## License
 
-[GNU General Public License v3](LICENSE)
+[GNU General Public License v3.0](LICENSE)
 
 ---
 
