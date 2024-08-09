@@ -49,6 +49,13 @@ class QuickCompOperator(bpy.types.Operator):
         bpy.context.scene.use_nodes = True
         tree = bpy.context.scene.node_tree
 
+        renderNode = tree.nodes.new(type="CompositorNodeRLayers")
+        renderNode.location = (-100, 0)
+
+        outputNode = tree.nodes.new(type="CompositorNodeComposite")
+        outputNode.location = (400, 0)
+
+
         bpy.data.textures.new("Film Grain QC", type="NOISE")
 
         textureNode = tree.nodes.new(type="CompositorNodeTexture")
@@ -88,12 +95,6 @@ class QuickCompOperator(bpy.types.Operator):
                 textureList.remove(texture)
                 textureCount += 1
         print("Quick Comp! [INFO] Removed " + str(textureCount) + " textures")
-
-        renderNode = tree.nodes.new(type="CompositorNodeRLayers")
-        renderNode.location = (-100, 0)
-
-        outputNode = tree.nodes.new(type="CompositorNodeComposite")
-        outputNode.location = (400, 0)
 
         return {"FINISHED"}
 
