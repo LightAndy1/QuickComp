@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://www.gum.co/LightAndy">
-    <img src="https://img.shields.io/badge/Get%20on%20Gumroad-ff90e8&amp;style=flat" alt="Get on Gumroad" />
+    <img src="https://img.shields.io/badge/Get%20on%20Gumroad-ff90e8" alt="Get on Gumroad" />
   </a>
   <a href="https://ko-fi.com/lightandy">
     <img src="https://img.shields.io/badge/$-KoFi-ff5f5f.svg?maxAge=2592000&amp;style=flat" alt="Buy Me a Coffee" />
@@ -53,7 +53,7 @@ You can [download](https://github.com/LightAndy/QuickComp/releases/tag/v1.2.0) t
 <p>Or</p>
 
 <a href="https://www.paypal.me/LightAndy">
-  <img src="https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png" alt="Donate with PayPal" />
+  <img src="https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png" alt="Donate with PayPal" width="200" />
 </a>
 
 ## License
