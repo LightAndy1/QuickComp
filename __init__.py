@@ -1,5 +1,5 @@
 bl_info = {
-    "name": "Quick Comp!",
+    "name": "Quick Comp! FREE",
     "blender": (4, 20, 0),
     "category": "Compositing",
 }
