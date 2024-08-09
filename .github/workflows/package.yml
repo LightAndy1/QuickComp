@@ -30,8 +30,14 @@ jobs:
         id: version
         run: |
           # Extract current version from __init__.py
-          current_version=$(grep -oP '__version__ = "\K[0-9]+\.[0-9]+\.[0-9]+' __init__.py)
+          current_version=$(awk -F'"' '/__version__ =/ {print $2}' __init__.py)
           echo "Current version: $current_version"
+
+          # Check if current_version is empty
+          if [ -z "$current_version" ]; then
+          echo "Error: Could not find the version in __init__.py"
+          exit 1
+          fi
 
           # Split the version into major, minor, and patch
           IFS='.' read -r major minor patch <<< "$current_version"
