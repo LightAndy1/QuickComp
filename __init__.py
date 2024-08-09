@@ -49,12 +49,26 @@ class QuickCompOperator(bpy.types.Operator):
         bpy.context.scene.use_nodes = True
         tree = bpy.context.scene.node_tree
 
+        textureList = bpy.data.textures
+        nodeCount = 0
+        textureCount = 0
+
+        for node in tree.nodes:
+            tree.nodes.remove(node)
+            nodeCount += 1
+        print("Quick Comp! [INFO] Removed " + str(nodeCount) + " nodes")
+
+        for texture in textureList:
+            if "film grain qc" in texture.name.lower():
+                textureList.remove(texture)
+                textureCount += 1
+        print("Quick Comp! [INFO] Removed " + str(textureCount) + " textures")
+
         renderNode = tree.nodes.new(type="CompositorNodeRLayers")
         renderNode.location = (-100, 0)
 
         outputNode = tree.nodes.new(type="CompositorNodeComposite")
         outputNode.location = (400, 0)
-
 
         bpy.data.textures.new("Film Grain QC", type="NOISE")
 
@@ -80,21 +94,6 @@ class QuickCompOperator(bpy.types.Operator):
         links.new(renderNode.outputs["Image"], mixNode.inputs[1])
         links.new(blurNode.outputs["Image"], mixNode.inputs[2])
         links.new(mixNode.outputs["Image"], outputNode.inputs["Image"])
-
-        textureList = bpy.data.textures
-        nodeCount = 0
-        textureCount = 0
-
-        for node in tree.nodes:
-            tree.nodes.remove(node)
-            nodeCount += 1
-        print("Quick Comp! [INFO] Removed " + str(nodeCount) + " nodes")
-
-        for texture in textureList:
-            if "film grain qc" in texture.name.lower():
-                textureList.remove(texture)
-                textureCount += 1
-        print("Quick Comp! [INFO] Removed " + str(textureCount) + " textures")
 
         return {"FINISHED"}
 
