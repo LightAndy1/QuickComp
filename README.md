@@ -2,14 +2,14 @@
   <br>
   <a href="https://github.com/LightAndy1/QuickComp"><img src="https://cdn.jsdelivr.net/gh/LightAndy1/cdn/Images/quickcomp-logo.png" alt="quick comp logo" width="200"></a>
   <br>
-  Quick Comp! (FREE)
+  Quick Comp!
   <br>
 </h1>
 
-<h4 align="center">Quick Comp! (FREE) is a Blender add-on designed to enhance the rendering process with just a single click (or two).</h4>
+<h4 align="center">Quick Comp! is a Blender add-on designed to enhance the rendering process with just a single click (or two).</h4>
 
 <p align="center">
-  <a href="https://www.gum.co/LightAndy">
+  <a href="https://lightandy.gumroad.com/l/quick-comp">
     <img src="https://img.shields.io/badge/Get%20on%20Gumroad-ff90e8" alt="Get on Gumroad" />
   </a>
   <a href="https://ko-fi.com/lightandy">
@@ -29,9 +29,9 @@
 
 ## Key Features
 
-- Film Grain (FREE)
-- Lens Distortion (PLUS)
-- Subtle Glare (PLUS)
+- Film Grain
+- Lens Distortion
+- Subtle Glare
 
 ## How To Use
 
@@ -42,7 +42,9 @@
 
 ## Download
 
-You can [download](https://github.com/LightAndy1/QuickComp/releases/tag/v1.0.0) the latest version of Quick Comp! (FREE) for Blender v4.2.0.
+You can [download](https://github.com/LightAndy1/QuickComp/releases/tag/v1.0.0) the latest version of Quick Comp! for Blender v4.2.0.
+
+Also you can go to [Gumroad](https://lightandy.gumroad.com/l/quick-comp) and download the add-on.
 
 ## Support
 
