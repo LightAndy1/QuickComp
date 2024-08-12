@@ -42,9 +42,9 @@
 
 ## Download
 
-You can [download](https://github.com/LightAndy1/QuickComp/releases/tag/v1.0.0) the latest version of Quick Comp! for Blender v4.2.0.
+You can [download](https://github.com/LightAndy1/QuickComp/releases/latest) the latest version of Quick Comp! for Blender v4.2.0.
 
-Also you can go to [Gumroad](https://lightandy.gumroad.com/l/quick-comp) and download the add-on.
+Also you can go to [Gumroad](https://lightandy.gumroad.com/l/quick-comp) and download the add-on for completely free.
 
 ## Support
 
