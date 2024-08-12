@@ -15,17 +15,20 @@ import bpy  # type: ignore #? Disabling warning visualization
 
 # Define properties for the checkboxes
 class QuickCompProperties(bpy.types.PropertyGroup):
-    lens_slider: bpy.props.IntProperty(
-        name="Lens Distortion", default=1, min=1, max=10, subtype="FACTOR"
+    chromatic_slider: bpy.props.IntProperty(
+        name="Chromatic abberation", default=2, min=1, max=10, subtype="FACTOR"
+    )  # type: ignore #? Disabling warning visualization
+    distortion_slider: bpy.props.IntProperty(
+        name="Lens distortion", default=7, min=1, max=10, subtype="FACTOR"
     )  # type: ignore #? Disabling warning visualization
     glare_slider: bpy.props.IntProperty(
-        name="Glare", default=1, min=1, max=10, subtype="FACTOR"
+        name="Glare", default=8, min=1, max=10, subtype="FACTOR"
     )  # type: ignore #? Disabling warning visualization
     grain_slider: bpy.props.IntProperty(
-        name="Grain", default=1, min=1, max=10, subtype="FACTOR"
+        name="Grain", default=1, min=2, max=10, subtype="FACTOR"
     )  # type: ignore #? Disabling warning visualization
-    vibrance_slider: bpy.props.IntProperty(
-        name="Vibrance", default=1, min=1, max=10, subtype="FACTOR"
+    contrast_slider: bpy.props.IntProperty(
+        name="Contrast", default=2, min=1, max=5, subtype="FACTOR"
     )  # type: ignore #? Disabling warning visualization
 
 
@@ -57,10 +60,11 @@ class QuickCompSubPanel(bpy.types.Panel):
         scene = context.scene
         quick_comp_props = scene.quick_comp_props
 
-        layout.prop(quick_comp_props, "lens_slider")
+        layout.prop(quick_comp_props, "chromatic_slider")
+        layout.prop(quick_comp_props, "distortion_slider")
         layout.prop(quick_comp_props, "glare_slider")
         layout.prop(quick_comp_props, "grain_slider")
-        # layout.prop(quick_comp_props, "vibrance_slider")  #todo: Add Vibrance
+        layout.prop(quick_comp_props, "contrast_slider")
 
         layout.operator("quick_comp.complex_render", text="Improve render (Complex)")
 
@@ -74,6 +78,7 @@ class QuickCompBasicOperator(bpy.types.Operator):
     )
 
     def execute(self, context):
+        currentScene = context.scene
         bpy.context.scene.use_nodes = True
         tree = bpy.context.scene.node_tree
         links = tree.links
@@ -92,6 +97,8 @@ class QuickCompBasicOperator(bpy.types.Operator):
                 textureCount += 1
         print("Quick Comp! [INFO] Removed " + str(textureCount) + " textures")
 
+        currentScene.view_settings.look = "AgX - Medium Low Contrast"
+
         renderNode = tree.nodes.new(type="CompositorNodeRLayers")
         renderNode.location = (-100, 0)
 
@@ -100,7 +107,9 @@ class QuickCompBasicOperator(bpy.types.Operator):
 
         lensNode = tree.nodes.new(type="CompositorNodeLensdist")
         lensNode.location = (200, 0)
-        lensNode.inputs[2].default_value = 0.01
+        lensNode.use_fit = True
+        lensNode.inputs[1].default_value = 0.01
+        lensNode.inputs[2].default_value = 0.005
         links.new(renderNode.outputs["Image"], lensNode.inputs["Image"])
 
         bpy.data.textures.new("Film Grain QC", type="NOISE")
@@ -120,7 +129,7 @@ class QuickCompBasicOperator(bpy.types.Operator):
         mixNode = tree.nodes.new(type="CompositorNodeMixRGB")
         mixNode.location = (400, 150)
         mixNode.blend_type = "SUBTRACT"
-        mixNode.inputs[0].default_value = 0.014
+        mixNode.inputs[0].default_value = 0.005
         links.new(blurNode.outputs["Image"], mixNode.inputs[2])
         links.new(lensNode.outputs["Image"], mixNode.inputs[1])
 
@@ -145,14 +154,23 @@ class QuickCompComplexOperator(bpy.types.Operator):
     )
 
     def execute(self, context):
-        lensSlider = context.scene.quick_comp_props.lens_slider
+        chromaticSlider = context.scene.quick_comp_props.chromatic_slider
+        distortionSlider = context.scene.quick_comp_props.distortion_slider
         glareSlider = context.scene.quick_comp_props.glare_slider
+        streaksSlider = glareSlider
         grainSlider = context.scene.quick_comp_props.grain_slider
+        contrastSlider = context.scene.quick_comp_props.contrast_slider
 
-        lensSlider = round(0.005 + (lensSlider - 1) * (0.045 / 9), 3)
-        glareSlider = round(-0.96 + (glareSlider - 1) * (0.71 / 9), 3)
-        grainSlider = round(0.01 + (grainSlider - 1) * (0.04 / 9), 3)
+        if glareSlider > 7:
+            streaksSlider = 0.05 + (streaksSlider - 4) * (0.283 / 9)
+        else:
+            streaksSlider = 0.05
+        glareSlider = round(0.1 + (glareSlider - 1) * (0.9 / 9), 3)
+        chromaticSlider = round(0.005 + (chromaticSlider - 1) * (0.045 / 9), 3)
+        distortionSlider = round(-0.02 + (distortionSlider - 1) * (0.04 / 9), 3)
+        grainSlider = round(0.005 + (grainSlider - 1) * (0.045 / 9), 3)
 
+        currentScene = context.scene
         bpy.context.scene.use_nodes = True
         tree = bpy.context.scene.node_tree
         textureList = bpy.data.textures
@@ -171,6 +189,17 @@ class QuickCompComplexOperator(bpy.types.Operator):
                 textureCount += 1
         print("Quick Comp! [INFO] Removed " + str(textureCount) + " textures")
 
+        look_map = {
+            1: "AgX - Low Contrast",
+            2: "AgX - Medium Low Contrast",
+            3: "AgX - Base Contrast",
+            4: "AgX - Medium High Contrast",
+            5: "AgX - High Contrast",
+        }
+        currentScene.view_settings.look = look_map.get(
+            contrastSlider, "AgX - Base Contrast"
+        )
+
         renderNode = tree.nodes.new(type="CompositorNodeRLayers")
         renderNode.location = (-100, 0)
 
@@ -182,7 +211,9 @@ class QuickCompComplexOperator(bpy.types.Operator):
 
         lensNode = tree.nodes.new(type="CompositorNodeLensdist")
         lensNode.location = (200, 0)
-        lensNode.inputs[2].default_value = lensSlider
+        lensNode.use_fit = True
+        lensNode.inputs[1].default_value = distortionSlider
+        lensNode.inputs[2].default_value = chromaticSlider
         links.new(renderNode.outputs["Image"], lensNode.inputs["Image"])
 
         bpy.data.textures.new("BW Film Grain QC", type="NOISE")
@@ -204,41 +235,64 @@ class QuickCompComplexOperator(bpy.types.Operator):
         blurNode.inputs[1].default_value = 2
         links.new(bwTextureNode.outputs["Value"], blurNode.inputs["Image"])
 
-        bwMixNode = tree.nodes.new(type="CompositorNodeMixRGB")
-        bwMixNode.location = (400, 300)
-        bwMixNode.blend_type = "MIX"
-        bwMixNode.inputs[0].default_value = 0.25
-        links.new(blurNode.outputs["Image"], bwMixNode.inputs[1])
+        streaksGlare = tree.nodes.new(type="CompositorNodeGlare")
+        streaksGlare.location = (200, -250)
+        streaksGlare.glare_type = "STREAKS"
+        streaksGlare.quality = "MEDIUM"
+        streaksGlare.mix = 1
+        streaksGlare.threshold = 15
+        streaksGlare.streaks = 16
+        links.new(renderNode.outputs["Image"], streaksGlare.inputs["Image"])
+
+        fogGlare = tree.nodes.new(type="CompositorNodeGlare")
+        fogGlare.location = (400, -250)
+        fogGlare.glare_type = "FOG_GLOW"
+        fogGlare.quality = "HIGH"
+        fogGlare.mix = 1
+        fogGlare.threshold = 15
+        fogGlare.size = 9
+        links.new(renderNode.outputs["Image"], fogGlare.inputs["Image"])
+
+        glareMixNode = tree.nodes.new(type="CompositorNodeMixRGB")
+        glareMixNode.location = (600, -150)
+        glareMixNode.blend_type = "ADD"
+        glareMixNode.inputs[0].default_value = streaksSlider
+        links.new(fogGlare.outputs["Image"], glareMixNode.inputs[1])
+        links.new(streaksGlare.outputs["Image"], glareMixNode.inputs[2])
 
         finalMixNode = tree.nodes.new(type="CompositorNodeMixRGB")
-        finalMixNode.location = (600, 150)
-        finalMixNode.blend_type = "SUBTRACT"
-        finalMixNode.inputs[0].default_value = grainSlider
-        links.new(bwMixNode.outputs["Image"], finalMixNode.inputs[2])
-        links.new(lensNode.outputs["Image"], finalMixNode.inputs[1])
-
-        glareNode = tree.nodes.new(type="CompositorNodeGlare")
-        glareNode.location = (800, 150)
-        glareNode.glare_type = "FOG_GLOW"
-        glareNode.quality = "HIGH"
-        glareNode.mix = glareSlider
-        glareNode.threshold = 0
-        glareNode.size = 9
-        links.new(finalMixNode.outputs["Image"], glareNode.inputs["Image"])
-        links.new(glareNode.outputs["Image"], outputNode.inputs["Image"])
-        links.new(glareNode.outputs["Image"], viewerNode.inputs["Image"])
+        finalMixNode.location = (800, 0)
+        finalMixNode.blend_type = "ADD"
+        finalMixNode.inputs[0].default_value = glareSlider
+        links.new(glareMixNode.outputs["Image"], finalMixNode.inputs[2])
+        links.new(finalMixNode.outputs["Image"], outputNode.inputs["Image"])
+        links.new(finalMixNode.outputs["Image"], viewerNode.inputs["Image"])
 
         coTextureNoise = tree.nodes.new(type="CompositorNodeTexture")
         coTextureNoise.location = (0, 600)
         coTextureNoise.texture = bpy.data.textures["CO Film Grain QC"]
 
+        firstMixNode = tree.nodes.new(type="CompositorNodeMixRGB")
+        firstMixNode.location = (200, 500)
+        firstMixNode.blend_type = "OVERLAY"
+        firstMixNode.inputs[0].default_value = 0.5
+        links.new(coTextureNoise.outputs["Color"], firstMixNode.inputs[1])
+        links.new(bwTextureNode.outputs["Value"], firstMixNode.inputs[2])
+
+        bwMixNode = tree.nodes.new(type="CompositorNodeMixRGB")
+        bwMixNode.location = (400, 300)
+        bwMixNode.blend_type = "SUBTRACT"
+        bwMixNode.inputs[0].default_value = grainSlider
+        links.new(lensNode.outputs["Image"], bwMixNode.inputs[1])
+        links.new(blurNode.outputs["Image"], bwMixNode.inputs[2])
+
         coMixNode = tree.nodes.new(type="CompositorNodeMixRGB")
-        coMixNode.location = (200, 500)
+        coMixNode.location = (600, 300)
         coMixNode.blend_type = "OVERLAY"
-        coMixNode.inputs[0].default_value = 0.5
-        links.new(coTextureNoise.outputs["Color"], coMixNode.inputs[1])
-        links.new(bwTextureNode.outputs["Value"], coMixNode.inputs[2])
-        links.new(coMixNode.outputs["Image"], bwMixNode.inputs[2])
+        coMixNode.inputs[0].default_value = grainSlider * 2
+        links.new(bwMixNode.outputs["Image"], coMixNode.inputs[1])
+        links.new(firstMixNode.outputs["Image"], coMixNode.inputs[2])
+        links.new(coMixNode.outputs["Image"], finalMixNode.inputs[1])
 
         return {"FINISHED"}
 
