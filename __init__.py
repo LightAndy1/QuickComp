@@ -16,7 +16,7 @@ import bpy  # type: ignore #? Disabling warning visualization
 # Define properties for the checkboxes
 class QuickCompProperties(bpy.types.PropertyGroup):
     chromatic_slider: bpy.props.IntProperty(
-        name="Chromatic abberation", default=2, min=1, max=10, subtype="FACTOR"
+        name="Chromatic aberration", default=2, min=1, max=10, subtype="FACTOR"
     )  # type: ignore #? Disabling warning visualization
     distortion_slider: bpy.props.IntProperty(
         name="Lens distortion", default=7, min=1, max=10, subtype="FACTOR"
