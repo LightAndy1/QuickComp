@@ -129,7 +129,7 @@ class QuickCompBasicOperator(bpy.types.Operator):
         mixNode = tree.nodes.new(type="CompositorNodeMixRGB")
         mixNode.location = (400, 150)
         mixNode.blend_type = "SUBTRACT"
-        mixNode.inputs[0].default_value = 0.005
+        mixNode.inputs[0].default_value = 0.01
         links.new(blurNode.outputs["Image"], mixNode.inputs[2])
         links.new(lensNode.outputs["Image"], mixNode.inputs[1])
 
@@ -137,7 +137,7 @@ class QuickCompBasicOperator(bpy.types.Operator):
         glareNode.location = (600, 150)
         glareNode.glare_type = "FOG_GLOW"
         glareNode.quality = "HIGH"
-        glareNode.mix = -0.881
+        glareNode.mix = -0.8
         glareNode.threshold = 0
         glareNode.size = 9
         links.new(mixNode.outputs["Image"], glareNode.inputs["Image"])
