@@ -2,7 +2,7 @@ bl_info = {
     "name": "Quick Comp!",
     "blender": (4, 2, 0),
     "category": "Compositing",
-    "version": (1, 0, 1),
+    "version": (1, 2, 0),
     "author": "LightAndy",
     "description": "Quick Comp! is a Blender add-on designed to enhance the rendering process with just a single click (or two).",
     "location": "View3D > N Panel",
