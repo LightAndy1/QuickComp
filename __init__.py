@@ -289,7 +289,7 @@ class QuickCompComplexOperator(bpy.types.Operator):
         coMixNode = tree.nodes.new(type="CompositorNodeMixRGB")
         coMixNode.location = (600, 300)
         coMixNode.blend_type = "OVERLAY"
-        coMixNode.inputs[0].default_value = grainSlider * 2
+        coMixNode.inputs[0].default_value = grainSlider * 6
         links.new(bwMixNode.outputs["Image"], coMixNode.inputs[1])
         links.new(firstMixNode.outputs["Image"], coMixNode.inputs[2])
         links.new(coMixNode.outputs["Image"], finalMixNode.inputs[1])
