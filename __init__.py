@@ -2,7 +2,7 @@ bl_info = {
     "name": "Quick Comp!",
     "blender": (4, 2, 0),
     "category": "Compositing",
-    "version": (1, 2, 0),
+    "version": (1, 1, 1),
     "author": "LightAndy",
     "description": "Quick Comp! is a Blender add-on designed to enhance the rendering process with just a single click (or two).",
     "location": "View3D > N Panel",
@@ -11,10 +11,11 @@ bl_info = {
 }
 
 import bpy  # type: ignore #? Disabling warning visualization
+import os
 
 
-# Define properties for the checkboxes
 class QuickCompProperties(bpy.types.PropertyGroup):
+    ambient_occlusion: bpy.props.BoolProperty(name="Ambient occlusion", default=True)  # type: ignore #? Disabling warning visualization
     chromatic_slider: bpy.props.IntProperty(
         name="Chromatic aberration", default=2, min=1, max=10, subtype="FACTOR"
     )  # type: ignore #? Disabling warning visualization
@@ -32,7 +33,6 @@ class QuickCompProperties(bpy.types.PropertyGroup):
     )  # type: ignore #? Disabling warning visualization
 
 
-# Define the Panel in the N menu
 class QuickCompPanel(bpy.types.Panel):
     bl_label = "Quick Comp!"
     bl_idname = "VIEW3D_PT_quick_comp"
@@ -60,6 +60,7 @@ class QuickCompSubPanel(bpy.types.Panel):
         scene = context.scene
         quick_comp_props = scene.quick_comp_props
 
+        layout.prop(quick_comp_props, "ambient_occlusion")
         layout.prop(quick_comp_props, "chromatic_slider")
         layout.prop(quick_comp_props, "distortion_slider")
         layout.prop(quick_comp_props, "glare_slider")
@@ -69,7 +70,6 @@ class QuickCompSubPanel(bpy.types.Panel):
         layout.operator("quick_comp.complex_render", text="Improve render (Complex)")
 
 
-# Define the Operator for the button
 class QuickCompBasicOperator(bpy.types.Operator):
     bl_idname = "quick_comp.basic_improve"
     bl_label = "Improve render (Basic)"
@@ -78,70 +78,50 @@ class QuickCompBasicOperator(bpy.types.Operator):
     )
 
     def execute(self, context):
-        currentScene = context.scene
         bpy.context.scene.use_nodes = True
         tree = bpy.context.scene.node_tree
         links = tree.links
         textureList = bpy.data.textures
-        nodeCount = 0
-        textureCount = 0
+        node_count = 0
+        texture_count = 0
 
         for node in tree.nodes:
             tree.nodes.remove(node)
-            nodeCount += 1
-        print("Quick Comp! [INFO] Removed " + str(nodeCount) + " nodes")
+            node_count += 1
+        print("Quick Comp! [INFO] Removed " + str(node_count) + " nodes")
 
         for texture in textureList:
             if "film grain qc" in texture.name.lower():
                 textureList.remove(texture)
-                textureCount += 1
-        print("Quick Comp! [INFO] Removed " + str(textureCount) + " textures")
+                texture_count += 1
+        print("Quick Comp! [INFO] Removed " + str(texture_count) + " textures")
 
-        currentScene.view_settings.look = "AgX - Medium Low Contrast"
+        bpy.context.scene.view_settings.look = "AgX - Medium Low Contrast"
+        bpy.context.scene.view_layers["ViewLayer"].use_pass_ambient_occlusion = True
 
-        renderNode = tree.nodes.new(type="CompositorNodeRLayers")
-        renderNode.location = (-100, 0)
+        render_node = tree.nodes.new(type="CompositorNodeRLayers")
+        render_node.location = (-100, 0)
 
-        outputNode = tree.nodes.new(type="CompositorNodeComposite")
-        outputNode.location = (800, 150)
+        output_node = tree.nodes.new(type="CompositorNodeComposite")
+        output_node.location = (400, 0)
 
-        lensNode = tree.nodes.new(type="CompositorNodeLensdist")
-        lensNode.location = (200, 0)
-        lensNode.use_fit = True
-        lensNode.inputs[1].default_value = 0.01
-        lensNode.inputs[2].default_value = 0.005
-        links.new(renderNode.outputs["Image"], lensNode.inputs["Image"])
+        file_path = os.path.join(os.path.dirname(__file__), "node_group.blend")
+        node_group_name = "Quick Comp! BASIC"
 
-        bpy.data.textures.new("Film Grain QC", type="NOISE")
+        with bpy.data.libraries.load(file_path, link=False) as (data_from, data_to):
+            if node_group_name in data_from.node_groups:
+                data_to.node_groups = [node_group_name]
 
-        bwTextureNode = tree.nodes.new(type="CompositorNodeTexture")
-        bwTextureNode.location = (0, 300)
-        bwTextureNode.texture = bpy.data.textures["Film Grain QC"]
+        node_group = bpy.data.node_groups[node_group_name]
 
-        blurNode = tree.nodes.new(type="CompositorNodeBlur")
-        blurNode.location = (200, 300)
-        blurNode.filter_type = "FAST_GAUSS"
-        blurNode.size_x = 1
-        blurNode.size_y = 1
-        blurNode.inputs[1].default_value = 2
-        links.new(bwTextureNode.outputs["Value"], blurNode.inputs["Image"])
-
-        mixNode = tree.nodes.new(type="CompositorNodeMixRGB")
-        mixNode.location = (400, 150)
-        mixNode.blend_type = "SUBTRACT"
-        mixNode.inputs[0].default_value = 0.01
-        links.new(blurNode.outputs["Image"], mixNode.inputs[2])
-        links.new(lensNode.outputs["Image"], mixNode.inputs[1])
-
-        glareNode = tree.nodes.new(type="CompositorNodeGlare")
-        glareNode.location = (600, 150)
-        glareNode.glare_type = "FOG_GLOW"
-        glareNode.quality = "HIGH"
-        glareNode.mix = -0.8
-        glareNode.threshold = 0
-        glareNode.size = 9
-        links.new(mixNode.outputs["Image"], glareNode.inputs["Image"])
-        links.new(glareNode.outputs["Image"], outputNode.inputs["Image"])
+        group_node = tree.nodes.new(type="CompositorNodeGroup")
+        group_node.node_tree = node_group
+        group_node.location = (200, 0)
+        links.new(render_node.outputs["Image"], group_node.inputs["Render"])
+        links.new(render_node.outputs["Alpha"], group_node.inputs["Alpha"])
+        links.new(render_node.outputs["AO"], group_node.inputs["AO"])
+        links.new(group_node.outputs["Output"], output_node.inputs["Image"])
+        links.new(group_node.outputs["Alpha"], output_node.inputs["Alpha"])
 
         return {"FINISHED"}
 
@@ -297,7 +277,6 @@ class QuickCompComplexOperator(bpy.types.Operator):
         return {"FINISHED"}
 
 
-# Register and Unregister
 classes = [
     QuickCompProperties,
     QuickCompPanel,
